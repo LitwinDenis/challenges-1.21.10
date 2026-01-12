@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "challenges",
+	"version": "${version}",
+	"name": "Challenges",
+	"description": "This is an Minecraft Challenge Mod!",
+	"authors": [
+		"Litwin Denis"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/challenges/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.challenges.Challenges"
+		],
+		"fabric-datagen": [
+			"net.challenges.ChallengesDataGenerator"
+		],
+        "client": [
+          "net.challenges.challengesclient"
+        ]
+	},
+	"mixins": [
+		"challenges.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
