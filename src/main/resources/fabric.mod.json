@@ -22,7 +22,7 @@
 			"net.challenges.ChallengesDataGenerator"
 		],
         "client": [
-          "net.challenges.challengesclient"
+            "net.challenges.challengesclient"
         ]
 	},
 	"mixins": [
