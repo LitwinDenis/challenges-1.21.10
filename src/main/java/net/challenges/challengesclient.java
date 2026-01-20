@@ -1,8 +1,10 @@
 package net.challenges;
 
 import net.challenges.gui.ChallengeGUI;
+import net.challenges.networking.ModPackets;
 import net.challenges.timer.TimerHandler;
 import net.challenges.timer.TimerJson;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -11,10 +13,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
-//import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
+
 
 
 public class challengesclient implements ClientModInitializer {
@@ -24,6 +26,18 @@ public class challengesclient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient(){
+
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.TimerSyncPayload.ID, (payload, context) -> {
+            // Wir holen die Daten direkt aus dem Payload-Objekt
+            boolean isRunning = payload.isRunning();
+            long ticks = payload.ticks();
+
+            // Auf dem Client Thread ausführen
+            context.client().execute(() -> {
+                TimerHandler.isRunning = isRunning;
+                TimerHandler.totalTicks = ticks;
+            });
+        });
 
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("start")
