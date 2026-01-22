@@ -8,21 +8,17 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ModPackets {
 
-    // 1. Definition des TIMER_SYNC Pakets (Server -> Client)
     public record TimerSyncPayload(boolean isRunning, long ticks) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<TimerSyncPayload> ID = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("challengemod", "timer_sync"));
 
-        // Codec: Erklärt Minecraft, wie man das Paket schreibt/liest
         public static final StreamCodec<FriendlyByteBuf, TimerSyncPayload> CODEC = StreamCodec.ofMember(
                 TimerSyncPayload::write, TimerSyncPayload::new
         );
 
-        // Konstruktor zum Lesen aus dem Buffer
         public TimerSyncPayload(FriendlyByteBuf buf) {
             this(buf.readBoolean(), buf.readLong());
         }
 
-        // Methode zum Schreiben in den Buffer
         public void write(FriendlyByteBuf buf) {
             buf.writeBoolean(this.isRunning);
             buf.writeLong(this.ticks);
@@ -34,7 +30,6 @@ public class ModPackets {
         }
     }
 
-    // 2. Definition des TIMER_CONTROL Pakets (Client -> Server)
     public record TimerControlPayload(boolean enableTimer, boolean reset) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<TimerControlPayload> ID = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("challengemod", "timer_control"));
 
@@ -57,7 +52,6 @@ public class ModPackets {
         }
     }
 
-    // 3. Methode zum Registrieren (Muss beim Start aufgerufen werden!)
     public static void registerPackets() {
         PayloadTypeRegistry.playS2C().register(TimerSyncPayload.ID, TimerSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(TimerControlPayload.ID, TimerControlPayload.CODEC);

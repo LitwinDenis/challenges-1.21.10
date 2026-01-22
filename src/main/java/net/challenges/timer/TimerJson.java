@@ -4,13 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Timer;
+
 
 public class TimerJson {
+    private static final Logger LOGGER = LoggerFactory.getLogger("challengemod");
     private static final Gson GSON = new Gson();
     private static final File CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("challenge_mod_timers").toFile();
 
@@ -20,14 +25,19 @@ public class TimerJson {
         if (client.getCurrentServer() != null) {
             return "server_" + client.getCurrentServer().ip.replaceAll("[^a-zA-Z0-9.-]", "_");
         }else if (client.hasSingleplayerServer()) {
-            return "world_" + client.getSingleplayerServer().getWorldData().getLevelName().replaceAll("[^a-zA-Z0-9.-]", "_");
+            IntegratedServer server = client.getSingleplayerServer();
+            if (server != null){
+                return "world_" + server.getWorldData().getLevelName().replaceAll("[^a-zA-Z0-9.-]", "_");
+            }
+
         }
         return "unknown";
     }
 
     public static void save() {
-        if (!CONFIG_DIR.exists()){
-            CONFIG_DIR.mkdirs();
+        if (!CONFIG_DIR.exists() &&CONFIG_DIR.mkdirs()){
+            System.out.println("Error: Config Folder didn't load!" + CONFIG_DIR);
+            return;
         }
         String worldId = getCurrentWorldId();
         if (worldId.equals("unknown")) return;
@@ -39,9 +49,10 @@ public class TimerJson {
             json.addProperty("isRunning", TimerHandler.isRunning);
 
             GSON.toJson(json, writer);
-            System.out.println("Timer saved:" + worldId);
+            LOGGER.info("Timer saved: {}", worldId);
+
         }catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error to save Timer", e);
         }
     }
     public static void load() {
@@ -58,9 +69,9 @@ public class TimerJson {
                 if (json.has("isRunning")) {
                     TimerHandler.isRunning = json.get("isRunning").getAsBoolean();
                 }
-                System.out.println("Timer loaded:" + worldId);
+                LOGGER.info("Timer loaded: {}" , worldId);
             }catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error to load Timer", e);
             }
         }else {
             TimerHandler.totalTicks = 0;
